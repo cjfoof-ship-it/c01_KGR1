@@ -52,7 +52,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
 
             // if Shift is pressed, adjust end point to closest direction of 0/45/90 degrees
             if (isShiftPressed) {
-                //end = constrainPoint(startPoint, currentPoint);
+                end = constrainPoint(startPoint, currentPoint);
             }
 
             Line previewLine = new Line(startPoint, end);
@@ -64,7 +64,29 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     }
 
     // lock the direction for the Shift button. Counts closest horizontal/vertical/diagonal point
-    // TODO
+
+    private Point constrainPoint(Point start, Point current) {
+        int dx = current.x - start.x;
+        int dy = current.y - start.y;
+
+        int absDx = Math.abs(dx);
+        int absDy = Math.abs(dy);
+
+        // decision of what is closer to our current position
+        if (absDx > 2 * absDy) {
+            // horizontal line
+            return new Point(current.x, start.y);
+        } else if (absDy > 2 * absDx) {
+            // vertical line
+            return new Point(start.x, current.y);
+        } else {
+            // diagonal
+            int size = (absDx + absDy) / 2;
+            int signX = (dx > 0) ? 1 : -1;
+            int signY = (dy > 0) ? 1 : -1;
+            return new Point(start.x + signX * size, start.y + signY * size);
+        }
+    }
 
     // mouse listeners
 
@@ -90,7 +112,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         if (e.getButton() == MouseEvent.BUTTON1 && startPoint != null) {
             Point endPoint = new Point(e.getX(), e.getY());
             if (isShiftPressed) {
-                //endPoint = constrainPoint(startPoint, endPoint);
+                endPoint = constrainPoint(startPoint, endPoint);
             }
 
             // save new line into screne
