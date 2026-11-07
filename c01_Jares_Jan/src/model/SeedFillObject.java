@@ -17,12 +17,12 @@ public class SeedFillObject implements Drawable {
     @Override
 
     public void draw(Panel panel, int color) {
-        // every time scene redraws inself, on this point seedFill starts again
+        // every time scene redraws itself, on this point seedFill starts again
         Filler filler = new SeedFiller(
                 seed.x, seed.y,
                 boundaryColor,
                 backgroundColor,
-                SeedFiller.FillMode.BACKGROUND_LIMITED
+                SeedFiller.FillMode.BORDER_LIMITED      // can be switched to BACKGROUND_LIMITED
         );
         filler.fill(panel, color);
     }
