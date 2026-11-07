@@ -1,9 +1,8 @@
 package controller;
 
-import model.Drawable;
-import model.Line;
-import model.Point;
-import model.Polygon;
+import algorithm.Filler;
+import algorithm.SeedFiller;
+import model.*;
 import view.Panel;
 
 import java.awt.event.*;
@@ -24,15 +23,16 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     // state of Shift button
     private boolean isShiftPressed = false;
 
-    private enum Mode {LINE, POLYGON}
+    private enum Mode {LINE, POLYGON, SEED_FILL}
 
     private Mode currentMode = Mode.LINE;   // line is default mode
     private Polygon currentPolygon = null;  // saves currently drawn polygon
 
     // default colors
-    private static final int COLOR_WHITE = 0xFFFFFFFF;
+    private static final int COLOR_WHITE = 0xFFFFFF;
     private static final int COLOR_YELLOW = 0xFFFF00;
     private static final int COLOR_GREEN = 0x00FF00;    // for curently drawn polygon
+    private static final int COLOR_RED = 0xFF0000;   // filler color
 
     public MainController(Panel panel) {
         this.panel = panel;
@@ -50,7 +50,9 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
 
         // draw saved lines
         for (Drawable obj : scene) {
-            obj.draw(panel, COLOR_WHITE);
+            if (obj instanceof SeedFillObject) {
+                obj.draw(panel, COLOR_RED);
+            } else obj.draw(panel, COLOR_WHITE);
         }
 
         if (currentMode == Mode.LINE) {
@@ -132,6 +134,18 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         if (e.getButton() == MouseEvent.BUTTON1) {
             Point clickedPoint = new Point(e.getX(), e.getY());
 
+            if (currentMode == Mode.SEED_FILL) {
+                // boundary color is white (color of lines in this project)
+                // create an object of SeedFiller
+                // 1. Vytvoříme objekt výplně a uložíme ho do seznamu scény
+                SeedFillObject fillObj = new SeedFillObject(clickedPoint, COLOR_WHITE, Panel.BACKGROUND_COLOR);
+                scene.add(fillObj);
+
+                // 2. Zavoláme překreslení scény, které vykreslí čáry a rovnou i tuto novou výplň
+                redraw();
+                return;
+            }
+
             if (currentMode == Mode.LINE) {
                 startPoint = new Point(e.getX(), e.getY());
                 currentPoint = startPoint;
@@ -153,6 +167,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        if (currentMode == Mode.SEED_FILL) return;
         if (startPoint != null) {
             currentPoint = new Point(e.getX(), e.getY());
             redraw();
@@ -202,6 +217,12 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         if (e.getKeyCode() == KeyEvent.VK_P) {
             // switch to POLYGON mode
             currentMode = Mode.POLYGON;
+            redraw();
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_F) {
+            currentMode = Mode.SEED_FILL;
+            finalizePolygon();
             redraw();
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {

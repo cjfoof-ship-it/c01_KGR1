@@ -9,7 +9,7 @@ public class Panel extends JPanel {
     private final BufferedImage raster;
     private final int width;
     private final int height;
-    private static final int BACKGROUND = 0X222222; //  dart grey
+    public static final int BACKGROUND_COLOR = 0X222222; //  dark grey
     public static final int INVALID_COLOR = -1;
 
     public Panel(int width, int height) {
@@ -49,7 +49,7 @@ public class Panel extends JPanel {
 
     public void clear() {
         Graphics g = raster.getGraphics();      // create g tool
-        g.setColor(new Color(BACKGROUND));
+        g.setColor(new Color(BACKGROUND_COLOR));
         g.fillRect(0, 0, width, height);
         g.dispose();
     }
