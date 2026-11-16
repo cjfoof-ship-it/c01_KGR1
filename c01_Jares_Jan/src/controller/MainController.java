@@ -5,6 +5,7 @@ import algorithm.SeedFiller;
 import model.*;
 import view.Panel;
 
+import javax.swing.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,8 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     // state of Shift button
     private boolean isShiftPressed = false;
 
-    private enum Mode {LINE, POLYGON, SEED_FILL}
+    private enum Mode {LINE, POLYGON, SEED_FILL, SCAN_LINE}
+    private SeedFiller.FillMode currentSeedFillMode = SeedFiller.FillMode.BACKGROUND_LIMITED;
 
     private Mode currentMode = Mode.LINE;   // line is default mode
     private Polygon currentPolygon = null;  // saves currently drawn polygon
@@ -138,7 +140,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
                 // boundary color is white (color of lines in this project)
                 // create an object of SeedFiller
                 // 1. Vytvoříme objekt výplně a uložíme ho do seznamu scény
-                SeedFillObject fillObj = new SeedFillObject(clickedPoint, COLOR_WHITE, Panel.BACKGROUND_COLOR);
+                SeedFillObject fillObj = new SeedFillObject(clickedPoint, COLOR_WHITE, Panel.BACKGROUND_COLOR, currentSeedFillMode);
                 scene.add(fillObj);
 
                 // 2. Zavoláme překreslení scény, které vykreslí čáry a rovnou i tuto novou výplň
@@ -221,8 +223,38 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         }
 
         if (e.getKeyCode() == KeyEvent.VK_F) {
-            currentMode = Mode.SEED_FILL;
             finalizePolygon();
+
+            // options to choose from
+            Object[] options = {
+                    "Seed Fill (BACKGROUND_LIMITED)",
+                    "Seed Fill (BORDER_LIMITED)",
+                    "Scan-line"
+            };
+
+            int choice = JOptionPane.showOptionDialog(
+                    panel,
+                    "Choose filling method:",
+                    "Method options",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                currentMode = Mode.SEED_FILL;
+                currentSeedFillMode = SeedFiller.FillMode.BACKGROUND_LIMITED;
+            } else if (choice == 1) {
+                currentMode = Mode.SEED_FILL;
+                currentSeedFillMode = SeedFiller.FillMode.BORDER_LIMITED;
+            } else if (choice == 2) {
+                currentMode = Mode.SCAN_LINE;
+                // TODO
+            }
+
+            panel.grabFocus();
             redraw();
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {

@@ -8,11 +8,13 @@ public class SeedFillObject implements Drawable {
     private final Point seed;
     private final int boundaryColor;
     private final int backgroundColor;
+    private final SeedFiller.FillMode mode;
 
-    public SeedFillObject(Point seed, int boundaryColor, int backgroundColor) {
+    public SeedFillObject(Point seed, int boundaryColor, int backgroundColor, SeedFiller.FillMode mode) {
         this.seed = seed;
         this.boundaryColor = boundaryColor;
         this.backgroundColor = backgroundColor;
+        this.mode = mode;
     }
     @Override
 
@@ -22,7 +24,7 @@ public class SeedFillObject implements Drawable {
                 seed.x, seed.y,
                 boundaryColor,
                 backgroundColor,
-                SeedFiller.FillMode.BORDER_LIMITED      // can be switched to BACKGROUND_LIMITED
+                mode     // can be switched to BACKGROUND_LIMITED
         );
         filler.fill(panel, color);
     }
