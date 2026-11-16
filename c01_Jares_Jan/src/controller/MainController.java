@@ -31,10 +31,11 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     private Polygon currentPolygon = null;  // saves currently drawn polygon
 
     // default colors
-    private static final int COLOR_WHITE = 0xFFFFFF;
+    public static final int COLOR_WHITE = 0xFFFFFF;
     private static final int COLOR_YELLOW = 0xFFFF00;
     private static final int COLOR_GREEN = 0x00FF00;    // for curently drawn polygon
-    private static final int COLOR_RED = 0xFF0000;   // filler color
+    private static final int COLOR_RED = 0xFF0000;   // filler color for seed fill
+    private static final int COLOR_BLUE = 0x0000FF;     // filler color for scan-line
 
     public MainController(Panel panel) {
         this.panel = panel;
@@ -54,6 +55,8 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         for (Drawable obj : scene) {
             if (obj instanceof SeedFillObject) {
                 obj.draw(panel, COLOR_RED);
+            } else if (obj instanceof ScanLineObject) {
+                obj.draw(panel, COLOR_BLUE);
             } else obj.draw(panel, COLOR_WHITE);
         }
 
@@ -251,7 +254,17 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
                 currentSeedFillMode = SeedFiller.FillMode.BORDER_LIMITED;
             } else if (choice == 2) {
                 currentMode = Mode.SCAN_LINE;
-                // TODO
+                // find last polygon made on scene
+                Polygon target = null;
+                for (int i = scene.size() - 1; i >=0; i--) {
+                    if (scene.get(i) instanceof Polygon) {
+                        target = (Polygon) scene.get(i);
+                        break;
+                    }
+                }
+                if (target != null) scene.add(new ScanLineObject(target));
+                else JOptionPane.showMessageDialog(panel, "No finished polygon on the screen");
+
             }
 
             panel.grabFocus();
