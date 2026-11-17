@@ -16,6 +16,7 @@ public class SeedFillObject implements Drawable {
         this.backgroundColor = backgroundColor;
         this.mode = mode;
     }
+
     @Override
 
     public void draw(Panel panel, int color) {

@@ -27,6 +27,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     private boolean isShiftPressed = false;
 
     private enum Mode {LINE, POLYGON, SEED_FILL, SCAN_LINE}
+
     private SeedFiller.FillMode currentSeedFillMode = SeedFiller.FillMode.BACKGROUND_LIMITED;
 
     private Mode currentMode = Mode.LINE;   // line is default mode
@@ -120,8 +121,8 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             // draw MAGENTA pentagon
             clipPentagon.draw(panel, COLOR_MAGENTA);
         }
-            // send BufferedImage to screen
-            panel.repaint();
+        // send BufferedImage to screen
+        panel.repaint();
     }
 
     private void clipLines() {
@@ -164,6 +165,10 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         SutherlandHodgemanClipper clipper = new SutherlandHodgemanClipper(clipPentagon);
         List<Drawable> newScene = new ArrayList<>();
 
+        // remember mapping of polygon (original -> new)
+        java.util.Map<Polygon, Polygon> clippedMap = new java.util.HashMap<>();
+
+        // fist loop, clip polygons and save them into HashMap
         for (Drawable obj : scene) {
             if (obj instanceof Polygon) {
                 Polygon originalPolygon = (Polygon) obj;
@@ -172,14 +177,36 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
                 // save clipped polygon only if there is any surface left (it has at least 3 vertices)
                 if (clippedPolygon.getVertices().size() >= 3) {
                     newScene.add(clippedPolygon);
+                    clippedMap.put(originalPolygon, clippedPolygon);    // save both, original and new polygon
                 }
+            }
+        }
+
+        // second loop, add other objects
+        for (Drawable obj : scene) {
+            if (obj instanceof Polygon) {
+                continue;   // already added
+            } else if (obj instanceof ScanLineObject) {
+                // check which polygon was filled with it
+                Polygon original = ((ScanLineObject) obj).getPolygon();
+                Polygon clipped = clippedMap.get(original);
+
+                // if polygon stayed on canvas, create fill for its clipped part
+                if (clipped != null) {
+                    newScene.add(new ScanLineObject(clipped));
+                }
+            } else if (obj instanceof SeedFillObject) {
+                // ignore old seed, so it won't start its cycle again
+                continue;
             } else {
+                // everything else stays unchanged
                 newScene.add(obj);
             }
         }
         scene.clear();
         scene.addAll(newScene);
     }
+
     // lock the direction for the Shift button. Counts closest horizontal/vertical/diagonal point
     private Point constrainPoint(Point start, Point current) {
         int dx = current.x - start.x;
@@ -338,7 +365,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
                 currentMode = Mode.SCAN_LINE;
                 // find last polygon made on scene
                 Polygon target = null;
-                for (int i = scene.size() - 1; i >=0; i--) {
+                for (int i = scene.size() - 1; i >= 0; i--) {
                     if (scene.get(i) instanceof Polygon) {
                         target = (Polygon) scene.get(i);
                         break;

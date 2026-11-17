@@ -80,10 +80,10 @@ public class CohenSutherlandClipper {
                 } else if ((codeOut & DOWN) != 0) {
                     x = x1 + (x2 - x1) * (yMax - y1) / (y2 - y1);
                     y = yMax;
-                } else if (( codeOut & RIGHT) != 0) {
+                } else if ((codeOut & RIGHT) != 0) {
                     y = y1 + (y2 - y1) * (xMax - x1) / (x2 - x1);
                     x = xMax;
-                } else if (( codeOut & LEFT) != 0) {
+                } else if ((codeOut & LEFT) != 0) {
                     y = y1 + (y2 - y1) * (xMin - x1) / (x2 - x1);
                     x = xMin;
                 }

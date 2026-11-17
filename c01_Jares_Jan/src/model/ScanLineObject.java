@@ -11,6 +11,10 @@ public class ScanLineObject implements Drawable {
         this.polygon = polygon;
     }
 
+    public Polygon getPolygon() {
+        return polygon;
+    }
+
     @Override
     public void draw(Panel panel, int color) {
         Filler filler = new ScanLineFiller(polygon);

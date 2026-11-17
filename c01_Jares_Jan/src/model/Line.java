@@ -12,8 +12,13 @@ public class Line implements Drawable {
         this.end = end;
     }
 
-    public Point getStart() {return start;}
-    public Point getEnd() {return end;}
+    public Point getStart() {
+        return start;
+    }
+
+    public Point getEnd() {
+        return end;
+    }
 
     @Override
     public void draw(Panel panel, int color) {

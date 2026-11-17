@@ -33,7 +33,7 @@ public class Panel extends JPanel {
         g.drawImage(raster, 0, 0, null);
     }
 
-    public void drawPixel(int x,  int y, int color) {
+    public void drawPixel(int x, int y, int color) {
         // prevention from drawing out of frame
         if (x >= 0 && x < width && y >= 0 && y < height) {
             raster.setRGB(x, y, color);

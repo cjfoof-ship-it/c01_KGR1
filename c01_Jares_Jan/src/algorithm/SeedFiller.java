@@ -2,6 +2,7 @@ package algorithm;
 
 import view.Panel;
 import model.Point;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -34,7 +35,7 @@ public class SeedFiller implements Filler {
         while (!queue.isEmpty()) {
             Point p = queue.poll();
             int rawColor = panel.getPixelColor(p.x, p.y);
-            int currentPointColor  = rawColor & 0xFFFFFF;
+            int currentPointColor = rawColor & 0xFFFFFF;
             // check if the point is still in raster or has background color
             if (rawColor == Panel.INVALID_COLOR || currentPointColor == fillColor) {
                 continue;
@@ -46,18 +47,18 @@ public class SeedFiller implements Filler {
                     shouldFill = true;
                 }
             } else if (mode == FillMode.BORDER_LIMITED) {
-                    if (currentPointColor != boundaryColor) {
-                        shouldFill = true;
-                    }
+                if (currentPointColor != boundaryColor) {
+                    shouldFill = true;
                 }
+            }
 
             if (shouldFill) {
-                    panel.drawPixel(p.x, p.y, fillColor);
+                panel.drawPixel(p.x, p.y, fillColor);
 
-                    queue.add(new Point(p.x + 1, p.y));
-                    queue.add(new Point(p.x - 1, p.y));
-                    queue.add(new Point(p.x, p.y + 1));
-                    queue.add(new Point(p.x, p.y - 1));
+                queue.add(new Point(p.x + 1, p.y));
+                queue.add(new Point(p.x - 1, p.y));
+                queue.add(new Point(p.x, p.y + 1));
+                queue.add(new Point(p.x, p.y - 1));
 
             }
         }
