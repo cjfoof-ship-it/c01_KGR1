@@ -3,6 +3,7 @@ package controller;
 import algorithm.CohenSutherlandClipper;
 import algorithm.Filler;
 import algorithm.SeedFiller;
+import algorithm.SutherlandHodgemanClipper;
 import model.*;
 import view.Panel;
 
@@ -38,6 +39,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     private static final int COLOR_RED = 0xFF0000;   // filler color for seed fill
     private static final int COLOR_BLUE = 0x0000FF;     // filler color for scan-line
     private static final int COLOR_CYAN = 0x00FFFF; // for rectangular clipping window
+    private static final int COLOR_MAGENTA = 0xFF00FF;  // for clipping polygon
 
     // coordinates of clipping rectangle (for Cohen-Sutherland clipping)
     private static final int CLIP_X_MIN = 200;
@@ -45,6 +47,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     private static final int CLIP_X_MAX = 600;
     private static final int CLIP_Y_MAX = 450;
 
+    private final Polygon clipPentagon = createClipPentagon();
     private boolean showClipWindow = false;
 
     public MainController(Panel panel) {
@@ -103,6 +106,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             }
         }
         if (showClipWindow) {
+            // draw CYAN rectangle
             Point p1 = new Point(CLIP_X_MIN, CLIP_Y_MIN);
             Point p2 = new Point(CLIP_X_MAX, CLIP_Y_MIN);
             Point p3 = new Point(CLIP_X_MAX, CLIP_Y_MAX);
@@ -112,10 +116,12 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             new Line(p2, p3).draw(panel, COLOR_CYAN);
             new Line(p3, p4).draw(panel, COLOR_CYAN);
             new Line(p4, p1).draw(panel, COLOR_CYAN);
-        }
 
-        // send BufferedImage to screen
-        panel.repaint();
+            // draw MAGENTA pentagon
+            clipPentagon.draw(panel, COLOR_MAGENTA);
+        }
+            // send BufferedImage to screen
+            panel.repaint();
     }
 
     private void clipLines() {
@@ -140,6 +146,37 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             }
         }
         // redraw previous scene to new clipped scene
+        scene.clear();
+        scene.addAll(newScene);
+    }
+
+    private Polygon createClipPentagon() {
+        Polygon p = new Polygon();
+        p.addVertex(new Point(400, 100));   // upper vertex
+        p.addVertex(new Point(600, 240));   // upper right
+        p.addVertex(new Point(520, 480));   // lower right
+        p.addVertex(new Point(280, 480));   // lower left
+        p.addVertex(new Point(200, 240));   // upper left
+        return p;
+    }
+
+    private void clipPolygons() {
+        SutherlandHodgemanClipper clipper = new SutherlandHodgemanClipper(clipPentagon);
+        List<Drawable> newScene = new ArrayList<>();
+
+        for (Drawable obj : scene) {
+            if (obj instanceof Polygon) {
+                Polygon originalPolygon = (Polygon) obj;
+                Polygon clippedPolygon = clipper.clip(originalPolygon);
+
+                // save clipped polygon only if there is any surface left (it has at least 3 vertices)
+                if (clippedPolygon.getVertices().size() >= 3) {
+                    newScene.add(clippedPolygon);
+                }
+            } else {
+                newScene.add(obj);
+            }
+        }
         scene.clear();
         scene.addAll(newScene);
     }
@@ -324,7 +361,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
 
             Object[] options = {
                     "clip lines (Cohen-Sutherland)",
-                    "clip objects (Sutherland-Hodgman"
+                    "clip objects (Sutherland-Hodgman), pentagon"
             };
 
             int choice = JOptionPane.showOptionDialog(
@@ -341,7 +378,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             if (choice == 0) {
                 clipLines();
             } else if (choice == 1) {
-                // TODO
+                clipPolygons();
             }
             showClipWindow = false;
 
@@ -359,6 +396,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             startPoint = null;
             currentPoint = null;
             showClipWindow = false;
+            currentPolygon = null;
             redraw();
         }
     }
