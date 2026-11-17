@@ -1,5 +1,6 @@
 package controller;
 
+import algorithm.CohenSutherlandClipper;
 import algorithm.Filler;
 import algorithm.SeedFiller;
 import model.*;
@@ -36,6 +37,15 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
     private static final int COLOR_GREEN = 0x00FF00;    // for curently drawn polygon
     private static final int COLOR_RED = 0xFF0000;   // filler color for seed fill
     private static final int COLOR_BLUE = 0x0000FF;     // filler color for scan-line
+    private static final int COLOR_CYAN = 0x00FFFF; // for rectangular clipping window
+
+    // coordinates of clipping rectangle (for Cohen-Sutherland clipping)
+    private static final int CLIP_X_MIN = 200;
+    private static final int CLIP_Y_MIN = 150;
+    private static final int CLIP_X_MAX = 600;
+    private static final int CLIP_Y_MAX = 450;
+
+    private boolean showClipWindow = false;
 
     public MainController(Panel panel) {
         this.panel = panel;
@@ -92,13 +102,48 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
                 }
             }
         }
+        if (showClipWindow) {
+            Point p1 = new Point(CLIP_X_MIN, CLIP_Y_MIN);
+            Point p2 = new Point(CLIP_X_MAX, CLIP_Y_MIN);
+            Point p3 = new Point(CLIP_X_MAX, CLIP_Y_MAX);
+            Point p4 = new Point(CLIP_X_MIN, CLIP_Y_MAX);
+
+            new Line(p1, p2).draw(panel, COLOR_CYAN);
+            new Line(p2, p3).draw(panel, COLOR_CYAN);
+            new Line(p3, p4).draw(panel, COLOR_CYAN);
+            new Line(p4, p1).draw(panel, COLOR_CYAN);
+        }
 
         // send BufferedImage to screen
         panel.repaint();
     }
 
-    // lock the direction for the Shift button. Counts closest horizontal/vertical/diagonal point
+    private void clipLines() {
+        CohenSutherlandClipper clipper = new CohenSutherlandClipper(
+                CLIP_X_MIN, CLIP_Y_MIN, CLIP_X_MAX, CLIP_Y_MAX
+        );
 
+        // create new list for objects to draw after clipping
+        List<Drawable> newScene = new ArrayList<>();
+
+        for (Drawable obj : scene) {
+            if (obj instanceof Line) {
+                Line originalLine = (Line) obj;
+                Line clippedLine = clipper.clip(originalLine);
+
+                // if Line was not entirely outside the clipping rectangle
+                if (clippedLine != null) {
+                    newScene.add(clippedLine);
+                }
+            } else { // leave polygons and fills
+                newScene.add(obj);
+            }
+        }
+        // redraw previous scene to new clipped scene
+        scene.clear();
+        scene.addAll(newScene);
+    }
+    // lock the direction for the Shift button. Counts closest horizontal/vertical/diagonal point
     private Point constrainPoint(Point start, Point current) {
         int dx = current.x - start.x;
         int dy = current.y - start.y;
@@ -270,6 +315,39 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             panel.grabFocus();
             redraw();
         }
+
+        if (e.getKeyCode() == KeyEvent.VK_X) {
+            finalizePolygon();
+            // clipping mode, show clipping window
+            showClipWindow = true;
+            redraw();
+
+            Object[] options = {
+                    "clip lines (Cohen-Sutherland)",
+                    "clip objects (Sutherland-Hodgman"
+            };
+
+            int choice = JOptionPane.showOptionDialog(
+                    panel,
+                    "Do you want to:",
+                    "Clipping options",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                clipLines();
+            } else if (choice == 1) {
+                // TODO
+            }
+            showClipWindow = false;
+
+            panel.grabFocus();
+            redraw();
+        }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             // pressing ENTER closes and saves currently drawn polygon
             finalizePolygon();
@@ -280,6 +358,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             scene.clear();
             startPoint = null;
             currentPoint = null;
+            showClipWindow = false;
             redraw();
         }
     }
