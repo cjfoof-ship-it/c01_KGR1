@@ -1,8 +1,21 @@
-// for drawing line, just click and drag the mouse
+# KPGR1 
 
-// press C to delete everything
-// press left Shift to draw horizonatal/vertical/diagonal line
-// press P to switch to POLYGON mode, then every new point connects with first point and previous point to create custom polygon
-// press ENTER to save currently drawn polygon
-// press L to switch back to LINE mode
-// press F to switch to FILL mode (option panel asks you to choose from SEED FILL BACKGROUND_LIMITED, SEED FILL BORDER_LIMITED, SCAN-LINE)
+## Controls
+
+* **Mouse (left click and drag)** draws a line
+* **Shift (hold while dragging)** draws either horizontal, vertical or diagonal line
+* **L** switches back to line mode
+* **P** switches to polygon mode. Every click creates new vertex of polygon
+* **Enter** closes and saves currently drawn polygon to scene
+* **F** switches to fill mode and opens dialog to choose filling algorithm
+    * **Seed Fill (BACKGROUND_LIMITED)** click to start (stops when no more points with BACKGROUND_COLOR are available)
+    * **Seed Fill (BORDER_LIMITED)** click to start (stops when reaching WHITE border)
+    * **Scan-line** filling applied to the last completed polygon
+* **X** displays clipping boundaries and opens the dialog to choose from clipping methods
+  * **Cohen-Sutherland** for lines (rectangle)
+  * **Sutherland-Hodgeman** for polygons (pentagon)
+* **C** clears the canvas and resets all data structures and states
+
+## Implementation Notes
+
+* **loss of color** when Sutherland-Hodgeman applied to polygons filled by seed fill method, the filling does not persist

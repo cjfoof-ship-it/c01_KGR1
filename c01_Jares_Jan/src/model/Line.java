@@ -4,8 +4,8 @@ import view.Panel;
 import algorithm.Rasterizer;
 
 public class Line implements Drawable {
-    public final Point start;
-    public final Point end;
+    private final Point start;
+    private final Point end;
 
     public Line(Point start, Point end) {
         this.start = start;

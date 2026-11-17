@@ -44,8 +44,7 @@ public class CohenSutherlandClipper {
         return code;
     }
 
-    // to clip line with rectangle (returns new clipped line, or null if rejected
-
+    // to clip line with rectangle (returns new clipped line, or null if rejected)
     public Line clip(Line line) {
         double x1 = line.getStart().x;
         double y1 = line.getStart().y;

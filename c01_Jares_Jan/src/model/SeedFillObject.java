@@ -18,7 +18,6 @@ public class SeedFillObject implements Drawable {
     }
 
     @Override
-
     public void draw(Panel panel, int color) {
         // every time scene redraws itself, on this point seedFill starts again
         Filler filler = new SeedFiller(

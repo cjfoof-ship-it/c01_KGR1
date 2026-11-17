@@ -1,7 +1,6 @@
 package controller;
 
 import algorithm.CohenSutherlandClipper;
-import algorithm.Filler;
 import algorithm.SeedFiller;
 import algorithm.SutherlandHodgemanClipper;
 import model.*;
@@ -11,6 +10,8 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MainController implements MouseListener, MouseMotionListener, KeyListener {
 
@@ -166,7 +167,7 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
         List<Drawable> newScene = new ArrayList<>();
 
         // remember mapping of polygon (original -> new)
-        java.util.Map<Polygon, Polygon> clippedMap = new java.util.HashMap<>();
+        Map<Polygon, Polygon> clippedMap = new HashMap<>();
 
         // fist loop, clip polygons and save them into HashMap
         for (Drawable obj : scene) {
@@ -251,11 +252,11 @@ public class MainController implements MouseListener, MouseMotionListener, KeyLi
             if (currentMode == Mode.SEED_FILL) {
                 // boundary color is white (color of lines in this project)
                 // create an object of SeedFiller
-                // 1. Vytvoříme objekt výplně a uložíme ho do seznamu scény
+                // create object of filling and save it into scene
                 SeedFillObject fillObj = new SeedFillObject(clickedPoint, COLOR_WHITE, Panel.BACKGROUND_COLOR, currentSeedFillMode);
                 scene.add(fillObj);
 
-                // 2. Zavoláme překreslení scény, které vykreslí čáry a rovnou i tuto novou výplň
+                // redraw lines and filling
                 redraw();
                 return;
             }
